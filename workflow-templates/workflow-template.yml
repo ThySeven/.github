@@ -63,6 +63,7 @@ jobs:
         else
           echo "::set-output name=tag::latest"
         fi
+        echo "${{ steps.docker_tag.outputs.tag }}"
 
     - name: Build and push the Docker image version
       uses: docker/build-push-action@v2
