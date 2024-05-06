@@ -59,19 +59,27 @@ jobs:
       id: docker_tag
       run: |
         if [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
-          echo "::set-output name=tag::dev"
+          # Using echo and file redirection for setting output with new syntax
+          echo "tag=dev" >> $GITHUB_OUTPUT
         else
-          echo "::set-output name=tag::latest"
+          echo "tag=latest" >> $GITHUB_OUTPUT
         fi
-        echo "${{ steps.docker_tag.outputs.tag }}"
+  
+    - name: Display Tag Result
+      run: echo "The determined tag is ${{ steps.docker_tag.outputs.tag }}"
 
-    - name: Build and push the Docker image version
+    - name: Convert repository name to lowercase
+      id: lowercase_repo_name
+      run: echo "lowercase_repo_name=$(echo '${{ steps.repo_name.outputs.name }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      
+    - name: Build and push the Docker image with lowercase repo name
       uses: docker/build-push-action@v2
       with:
         context: .
         file: Dockerfile
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.repo_name.outputs.name }}:${{ steps.versioning.outputs.new_version }}
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.lowercase_repo_name }}:${{ steps.docker_tag.outputs.tag }}
 
     - name: Build and push the Docker image latest
       uses: docker/build-push-action@v2
@@ -79,7 +87,7 @@ jobs:
         context: .
         file: Dockerfile
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.repo_name.outputs.name }}:${{ steps.docker_tag.outputs.tag }}
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.lowercase_repo_name }}:${{ steps.docker_tag.outputs.tag }}.toLowerCase()
 
     - name: Commit VERSION file change
       run: |
