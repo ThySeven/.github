@@ -87,7 +87,7 @@ jobs:
         context: .
         file: Dockerfile
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.repo_name.outputs.name }}:${{ steps.versioning.outputs.new_version }}
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.lowercase_repo_name }}:${{ steps.versioning.outputs.new_version }}
 
     - name: Commit VERSION file change
       run: |
