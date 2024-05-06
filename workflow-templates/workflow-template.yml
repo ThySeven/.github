@@ -4,7 +4,11 @@ on:
   push:
     branches:
       - main  # Adjust this to match the branch you want to trigger the build.
-      
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
 permissions:
   contents: write
   
@@ -51,6 +55,15 @@ jobs:
         REPO_NAME="${GITHUB_REPOSITORY#*/}"
         echo "::set-output name=name::$REPO_NAME"
 
+    - name: Determine tag for the Docker image
+      id: docker_tag
+      run: |
+        if [[ "${{ github.ref }}" == "refs/heads/dev" ]]; then
+          echo "::set-output name=tag::dev"
+        else
+          echo "::set-output name=tag::latest"
+        fi
+
     - name: Build and push the Docker image version
       uses: docker/build-push-action@v2
       with:
@@ -65,7 +78,7 @@ jobs:
         context: .
         file: Dockerfile
         push: true
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.repo_name.outputs.name }}:latest
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ steps.repo_name.outputs.name }}:${{ steps.docker_tag.outputs.tag }}
 
     - name: Commit VERSION file change
       run: |
