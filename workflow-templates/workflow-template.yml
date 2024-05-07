@@ -1,17 +1,21 @@
 name: Build and Push to Docker Hub
 
 on:
-  push:
-    branches:
-      - main  # Adjust this to match the branch you want to trigger the build.
-      - dev
-  pull_request:
-    branches:
-      - main
-      - dev
+  workflow_call:
+    inputs:
+      dockerhub_username:
+        required: true
+        type: string
+      dockerhub_token:
+        required: true
+        type: secret
+    secrets:
+      pass_through: ${{ inputs.dockerhub_token }}
+
 permissions:
   contents: write
-  
+  packages: write # Ensure you have this permission if pushing to GitHub Packages
+
 jobs:
   build_and_push:
     runs-on: ubuntu-latest
@@ -27,8 +31,8 @@ jobs:
     - name: Log in to Docker Hub
       uses: docker/login-action@v1
       with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        username: ${{ github.events.inputs.dockerhub_username }}
+        password: ${{ secrets.pass_through }}
 
     - name: Determine and increment version
       id: versioning

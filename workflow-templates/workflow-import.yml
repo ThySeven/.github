@@ -1,0 +1,29 @@
+name: Caller Workflow
+
+on: 
+  push:
+    branches:
+      - main
+
+jobs:
+  trigger-build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+    - name: Call Build and Push Workflow
+      uses: actions/github-script@v6
+      with:
+        script: |
+          github.actions.createWorkflowDispatch({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            workflow_id: 'build-and-push-to-docker-hub.yml', # Change this to the path or ID of the Build and Push workflow file
+            ref: 'main', # Target branch or tag to run the workflow on
+            inputs: {
+              dockerhub_username: 'secrets.DOCKERHUB_USERNAME', # Set your DockerHub Username
+              dockerhub_token: '${{ secrets.DOCKERHUB_TOKEN }}', # Assuming you've stored your DockerHub token in a repository secret
+            }
+          })
+        secrets: 'inherit'
