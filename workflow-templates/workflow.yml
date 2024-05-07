@@ -1,20 +1,16 @@
 name: Build and Push to Docker Hub
 
 on:
-  workflow_call:
-    inputs:
-      dockerhub_username:
-        required: true
-        type: string
-      dockerhub_token:
-        required: true
-        type: secret
-    secrets:
-      pass_through: ${{ inputs.dockerhub_token }}
-
+  push:
+    branches:
+      - main  # Adjust this to match the branch you want to trigger the build.
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
 permissions:
   contents: write
-  packages: write # Ensure you have this permission if pushing to GitHub Packages
 
 jobs:
   build_and_push:
@@ -31,8 +27,8 @@ jobs:
     - name: Log in to Docker Hub
       uses: docker/login-action@v1
       with:
-        username: ${{ github.events.inputs.dockerhub_username }}
-        password: ${{ secrets.pass_through }}
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
     - name: Determine and increment version
       id: versioning
@@ -52,13 +48,11 @@ jobs:
         echo "$NEW_VERSION" > VERSION
         echo "::set-output name=new_version::$NEW_VERSION"
         echo "new_version=$NEW_VERSION" >> $GITHUB_ENV
-
     - name: Extract repository name
       id: repo_name
       run: |
         REPO_NAME="${GITHUB_REPOSITORY#*/}"
         echo "::set-output name=name::$REPO_NAME"
-
     - name: Determine tag for the Docker image
       id: docker_tag
       run: |
@@ -76,7 +70,7 @@ jobs:
       id: lowercase_repo_name
       run: echo "lowercase_repo_name=$(echo '${{ steps.repo_name.outputs.name }}' | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
 
-      
+
     - name: Build and push the Docker image with lowercase repo name
       uses: docker/build-push-action@v2
       with:
