@@ -1,6 +1,6 @@
 {
-    "name": "ThySeven Workflow - IKKE BRUG DEN HER",
-    "description": "ThySeven CI starter workflow. - IKKE BRUG DEN HER",
+    "name": "ThySeven Workflow - BRUG DEN HER",
+    "description": "ThySeven CI starter workflow. - BRUG DEN HER",
     "iconName": "example-icon",
     "categories": [
         "continuous-integration"
