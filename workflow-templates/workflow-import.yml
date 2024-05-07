@@ -6,24 +6,24 @@ on:
       - main
 
 jobs:
-  trigger-build-and-push:
+  trigger-workflow-dispatch:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
     steps:
-    - name: Call Workflow Template
+    - name: Dispatch Workflow
       uses: actions/github-script@v6
       with:
         script: |
-          github.actions.createWorkflowDispatch({
+          github.rest.actions.createWorkflowDispatch({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            workflow_id: '.github/workflow-templates/workflow-template.yml',
+            workflow_id: '.github/workflow-templates/workflow-template.yml', # Specify the path relative to the root of the repo or the workflow ID
             ref: 'main',
             inputs: {
-              dockerhub_username: 'secrets.DOCKERHUB_USERNAME',
+              dockerhub_username: '${{ secrets.DOCKERHUB_USERNAME }}',
               dockerhub_token: '${{ secrets.DOCKERHUB_TOKEN }}',
             }
-          })
+          });
         secrets: 'inherit'
