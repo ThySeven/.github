@@ -11,6 +11,7 @@ jobs:
     permissions:
       contents: read
       id-token: write
+      workflows: write
     steps:
     - name: Dispatch Workflow
       uses: actions/github-script@v6
@@ -19,7 +20,7 @@ jobs:
           await github.rest.actions.createWorkflowDispatch({
             owner: context.repo.owner,
             repo: context.repo.repo,
-            workflow_id: '.github/workflow-templates/workflow-template.yml',
+            workflow_id: 'workflow.yml', # Make sure this is the correct path within .github/workflows/
             ref: 'main',
             inputs: {
               dockerhub_username: '${{ secrets.DOCKERHUB_USERNAME }}',
